@@ -10,7 +10,8 @@ c.fillRect(0, 0, canvas.width, canvas.height);
 let gravity = .13;
 const resistance = .15;
 let platFormList = [];
-let gameModes = ["Easy", "Normal", "Hard"];
+let upgradeTowers = [];
+const gameModes = ["Easy", "Normal", "Hard"];
 //0=easy, 1=normal, 2=hard
 let currentGM = 0;
 
@@ -23,9 +24,19 @@ const keys = {
   },
   w: {
     pressed: false
+  }
+}
+
+const upgradeLevels = {
+  jump: {
+    level: [1, 2, 3, 4, 5],
+    value: [9, 9.5, 10, 10.5, 11],
+    cost: [0, 100, 500, 1000, 1500]
   },
-  e: {
-    pressed: false
+  speed: {
+    level: [1, 2, 3, 4, 5],
+    value: [2, 3, 4, 5, 6],
+    cost: [50, 250, 500, 100]
   }
 }
 
@@ -91,7 +102,7 @@ function generatePlatforms(gamemode) {
       interval = 125;
       break;
   }
-  calcRandomPlatform(700, -1000, offsetY, interval);
+  calcRandomPlatform(700, -100_000, offsetY, interval);
 }
 
 generatePlatforms(gameModes[currentGM]);
@@ -101,6 +112,12 @@ generatePlatforms(gameModes[currentGM]);
 function updateLifes(lifes){
   let outPut = "life" + lifes;
   $('#' + outPut).attr("src", "img/heart-empty.png");
+}
+
+//upgrade jumpForce
+
+function upgradeJump(object) {
+  object.jumpForce-=1;
 }
 
 //--------------------------------------------OBJECT INITS-----------------------------------------------//
@@ -168,9 +185,23 @@ let player1 = new Player(
   90
 );
 
+
 //instance of punchingbag class //PUNCHINGBAG ENTITY
 
 let punchingBag = new PunchingBag(60, 300, {x: 0, y: 0});
+
+let jumpBar = new loadingBar({
+  x: 225,
+  y: canvas.height
+}, 50, -50);
+
+let upgradeJumpTower = new upgradeTower({
+  x:200,
+  y: canvas.height-700
+}, 100, 700, jumpBar, "jump");
+
+upgradeTowers.push(upgradeJumpTower);
+
 
 //--------------------------------------------RESET FUNCTIONS-----------------------------------------------//
 
@@ -231,7 +262,7 @@ function resetLobbyGame() {
   //player position reset (dont wanna create new instance as it'll remove other stats)
 
   player1.position.x = (canvas.width / 2);
-  player1.position.y = startPlatform.position.y - 75;
+  player1.position.y = startPlatform.position.y - player1.height-5;
 
 //instance of punchingbag class //PUNCHINGBAG ENTITY
 
@@ -243,21 +274,8 @@ function resetLobbyGame() {
 function resetArmory() {
   currentScenery="armory";
   platFormList=[];
-
-  const testPlatform = new Platform(
-    {
-      x: (canvas.width / 2) - 300,
-      y: 1000
-    }, {
-      x: 0,
-      y: 0
-    }, 600,
-    30
-  );
-
-  platFormList.push(testPlatform);
   player1.position.x = (canvas.width / 2);
-  player1.position.y = testPlatform.position.y - 75;
+  player1.position.y = canvas.height - 75;
 
 }
 
@@ -269,29 +287,59 @@ function animate() {
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
-  //elements to update between each frame
+  //elements to update if player in lobby
 
-      //platforms//
-  platFormList.forEach((platform) =>{
-    platform.update();
-  });
-  //     //punchingbag//
-  // punchingBag.update();
-      //player//
-  player1.update();
-
-  //win round detection
   if(currentScenery==="lobby"){
+
+    //platforms//
+    platFormList.forEach((platform) =>{
+      platform.update();
+    });
+
+    //win round detection
     if(player1.position.y+player1.height <= platFormList[platFormList.length-2].position.y){
       resetLobbyGame();
     }
+    //player death detection
+    if(player1.position.y + player1.height + player1.velocity.y >= canvas.height){
+      player1.lifes-=1;
+      updateLifes(player1.lifes);
+      resetLobbyGame();
+      //player is dead
+    }
   }
-  if(player1.position.y + player1.height + player1.velocity.y >= canvas.height && currentScenery==="lobby"){
-    player1.lifes-=1;
-    updateLifes(player1.lifes);
-    resetLobbyGame();
-    //player is dead
+
+  //elements to update if player is in armory
+
+  if(currentScenery==="armory"){
+    upgradeTowers.forEach((tower)=>{
+      tower.update();
+      tower.loadingBar.update();
+
+      if(player1.position.y <= tower.position.y + tower.height &&
+          player1.position.y + player1.height + player1.velocity.y >= tower.position.y &&
+          player1.position.x + player1.width + player1.velocity.x >= tower.position.x &&
+          player1.position.x + player1.velocity.x <= tower.position.x+tower.width &&
+          player1.isInteracting===true){
+          player1.isInteracting=false;
+          switch(tower.type){
+            case "jump":
+              if(player1.coins>=upgradeLevels.jump.cost[player1.currentJumpLevel] && player1.currentJumpLevel<=upgradeLevels.jump.level.length){
+                console.log("oppgrader");
+                player1.currentJumpLevel++;
+                tower.loadingBar.height-=100;
+                tower.loadingBar.update();
+                player1.coins-=upgradeLevels.jump.cost[player1.currentJumpLevel-1];
+                $('#balanceValue').html(player1.coins);
+              }else console.log("Not enough coins!");
+              break;
+          }
+      }
+    });
+
   }
+
+  player1.update();
 
 
   //check for platform detection
@@ -315,7 +363,17 @@ function animate() {
         platform.entity=null;
         platform.hasEntity=false;
         platform.update();
-        player1.coins++;
+        switch (currentGM) {
+          case 0:
+            player1.coins++;
+            break;
+          case 1:
+            player1.coins+=2;
+            break;
+          case 3:
+            player1.coins+=3;
+            break;
+        }
         $('#balanceValue').html(player1.coins);
       }
     }
@@ -323,11 +381,11 @@ function animate() {
 
   //enhanced movement
   if (keys.a.pressed && player1.lastKeyPressed === "a") {
-    player1.velocity.x = -player1.speed;
+    player1.velocity.x = -upgradeLevels.speed.value[player1.currentSpeedLevel-1];
   } else if (keys.d.pressed && player1.lastKeyPressed === "d") {
-    player1.velocity.x = player1.speed;
+    player1.velocity.x = upgradeLevels.speed.value[player1.currentSpeedLevel-1];
   }else if (keys.w.pressed && player1.lastKeyPressed === "w" && player1.velocity.y===0 && player1.midBorderMovement === true){
-    player1.velocity.y=player1.jumpForce;
+    player1.velocity.y= -upgradeLevels.jump.value[player1.currentJumpLevel-1]
   }
 
   //collision detection for interactions (e)
@@ -336,7 +394,7 @@ function animate() {
     player1.position.y <= startPlatform.entity1.position.y + startPlatform.entity1.height &&
     player1.position.x + player1.width >= startPlatform.entity1.position.x &&
     player1.position.x <= startPlatform.entity1.position.x+startPlatform.entity1.width &&
-    keys.e.pressed===true){
+    player1.isInteracting===true){
     resetArmory();
   }
 
@@ -381,7 +439,13 @@ let _timeout;
 document.addEventListener("keypress", function (e) {
   switch (e.key) {
     case "e":
-      keys.e.pressed=true;
+      if (player1.isInteracting === false) {
+        player1.interact();
+        _timeout = setTimeout(()=>{
+          if(player1.isInteracting === true)
+            player1.isInteracting=false;
+        },20);
+      }
       break;
     case "w":
       keys.w.pressed=true;
@@ -398,10 +462,10 @@ document.addEventListener("keypress", function (e) {
       player1.lastKeyPressed = "a";
       break;
     case " ":
-      if (player1.isAttacking === false) {
+      if (!player1.isAttacking) {
         player1.swing();
           _timeout = setTimeout(()=>{
-          if(player1.isAttacking === true)
+          if(player1.isAttacking)
             player1.isAttacking=false;
         },20);
       }
@@ -415,7 +479,10 @@ document.addEventListener("keypress", function (e) {
 document.addEventListener("keyup", function (e) {
   switch (e.key) {
     case "e":
-      keys.e.pressed=false;
+      if (player1.isInteracting){
+        clearTimeout(_timeout);
+        player1.isInteracting=false;
+      }
       break;
     case "d":
       keys.d.pressed = false;
