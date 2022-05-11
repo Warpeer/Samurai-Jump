@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+  align-items: center;
+  text-align: center;
+}
+#container{
+  border: 2px solid green;
+  width: fit-content;
+  margin: auto;
+  position: relative;
+  padding: 0;
+}
+#infoWrapper{
+  width: 1024px;
+  height: fit-content;
+  position: absolute;
+  color: white;
+  text-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+#infoWrapper img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+#playerBalance{
+  margin-left: 10px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+
+}
+.balance{
+  font-weight: bolder;
+  font-family: Verdana, sans-serif;
+  margin-right: 10px;
+}
+#balanceValue{
+  font-size: 25px;
+}
+#playerLife{
+  margin-right: 10px;
+  width: fit-content;
+}
+
+
+
+
