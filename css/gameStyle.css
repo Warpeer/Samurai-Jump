@@ -4,8 +4,8 @@ body {
   text-align: center;
 }
 #container{
-  border: 2px solid green;
   width: fit-content;
+  height: fit-content;
   margin: auto;
   position: relative;
   padding: 0;

@@ -67,11 +67,12 @@ class Player {
   direction;
   attackRange;
   isAttacking=false;
+  isInteracting=false;
 
   lifes = 3;
-  coins = 0;
-  jumpForce = -10;
-  speed = 3;
+  coins = 100000;
+  currentJumpLevel=1;
+  currentSpeedLevel=1;
 
   constructor(position, velocity, direction, width, height, attackRange) {
     this.position = position;
@@ -129,15 +130,7 @@ class Player {
       if(force<=0){
         player1.position.y+=5;
         platFormList.forEach((platform) => {
-          // if(platform.hasEntity){
-          //   platform.entity.velocity.y=-force*1.25;
-          // }
           platform.velocity.y=-force*1.25;
-          // if(platform.toString()==="megaPlatform"){
-          //   platform.entity1.velocity.y=-force*1.25;
-          //   platform.entity2.velocity.y=-force*1.25;
-          //   platform.entity3.velocity.y=-force*1.25;
-          // }
         });
       }
       player1.velocity.y=0;
@@ -163,7 +156,12 @@ class Player {
     setTimeout(() => {
       this.isAttacking=false;
     }, 100);
-
+  }
+  interact(){
+    this.isInteracting=true;
+    setTimeout(() => {
+      this.isInteracting=false
+    }, 1000);
   }
 }
 
@@ -310,6 +308,45 @@ class Door extends platformEntity{
   }
   toString(){
     return "door";
+  }
+}
+
+//loadingBar class
+
+class loadingBar{
+  constructor(position, width, height) {
+    this.position=position;
+    this.width=width;
+    this.height=height;
+  }
+  draw(){
+    c.fillStyle="yellow";
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+  }
+  update(){
+    this.draw();
+  }
+}
+
+//upgradeTower class
+
+class upgradeTower{
+  constructor(position, width, height, loadingBar, type) {
+    this.position = position;
+    this.width=width;
+    this.height=height;
+    this.loadingBar=loadingBar;
+    this.type=type;
+  }
+  draw(){
+    c.fillStyle="red";
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+  }
+  update(){
+    this.draw();
+  }
+  toString(){
+    return this.type;
   }
 }
 
