@@ -70,9 +70,10 @@ class Player {
   isInteracting=false;
 
   lifes = 3;
+  hp = 100;
   coins = 100000;
-  currentJumpLevel=1;
-  currentSpeedLevel=1;
+  currentJumpLevel=5;
+  currentSpeedLevel=5;
 
   constructor(position, velocity, direction, width, height, attackRange) {
     this.position = position;
@@ -112,6 +113,12 @@ class Player {
     this.draw();
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
+
+    //life value check
+
+    if(this.lifes<0){
+      this.lifes=0;
+    }
 
     //collision check for ground
 
@@ -283,11 +290,74 @@ class MegaPlatform extends Platform{
   }
 }
 
+//projectile class
+
+class Projectile{
+  constructor(position, velocity, radius) {
+    this.position=position;
+    this.velocity=velocity;
+    this.radius=radius;
+    this.fillstyle = "blue";
+  }
+  draw(){
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, Math.PI*2, 0, false);
+    c.fillStyle=this.fillstyle;
+    c.fill();
+  }
+  update(){
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
 //cannon class
 
 class Cannon extends platformEntity{
-  constructor() {
-    super();
+
+  constructor(position, width, height) {
+    super(position, width, height);
+    this.fillstyle="gray";
+  }
+  draw() {
+    super.draw(this.fillstyle);
+  }
+  update(posY) {
+    this.position.y=posY-this.height;
+    this.draw();
+  }
+  fire(targetPosX, targetPosY){
+    const angle = Math.atan2(targetPosY-this.position.y, targetPosX-this.position.x);
+    const projectile = new Projectile({
+      x: this.position.x+(this.width/2),
+      y: this.position.y+(this.height/2)
+    }, {
+      x: Math.cos(angle)*6,
+      y: Math.sin(angle)*6
+    }, 10);
+    projectileList.push(projectile);
+  }
+  toString(){
+    return "cannon";
+  }
+}
+
+//shaft class (for cannon class)
+
+class Shaft {
+  constructor(position, width, height) {
+    this.position=position;
+    this.width=width;
+    this.height=height;
+  }
+  draw(){
+    c.rotate(45);
+    c.fillRect(this.position.x, this.position.y-this.height, this.width, this.height);
+    c.rotate(-45);
+  }
+  update(){
+    this.draw();
   }
 }
 
@@ -295,9 +365,10 @@ class Cannon extends platformEntity{
 
 class Door extends platformEntity{
 
-  constructor(position, width, height, fillstyle) {
+  constructor(position, width, height, fillstyle, destination) {
     super(position, width, height);
     this.fillstyle=fillstyle;
+    this.destination=destination;
   }
   draw(fillstyle) {
     super.draw(fillstyle);

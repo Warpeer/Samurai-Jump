@@ -2,6 +2,10 @@ body {
   margin: 0;
   align-items: center;
   text-align: center;
+  font-family: 'Press Start 2P', cursive;
+}
+p {
+  margin: 0;
 }
 #container{
   width: fit-content;
@@ -19,7 +23,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 5px;
+  margin-top: 80px;
 }
 #infoWrapper img {
   width: 40px;
@@ -34,10 +38,10 @@ body {
   justify-content: space-evenly;
 
 }
-.balance{
+.genFont{
   font-weight: bolder;
-  font-family: Verdana, sans-serif;
   margin-right: 10px;
+  color: white;
 }
 #balanceValue{
   font-size: 25px;
@@ -46,6 +50,89 @@ body {
   margin-right: 10px;
   width: fit-content;
 }
+#healthbarWrapper{
+  position: absolute;
+  height: 40px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+#healthbar{
+  position: relative;
+  width: 200px;
+  height: 25px;
+  background-color: red;
+  border-radius: 8px;
+}
+#healtbarContainer{
+  width: 200px;
+  height: 25px;
+  border-radius: 15px;
+  border: 5px solid slategray;
+}
+#healthbarVal{
+  margin-right: 25px;
+  margin-left: 20px;
+  font-size: 20px;
+}
+#gameOverlay{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1;
+  backdrop-filter: blur(5px);
+  display: none;
+  font-size: larger;
+}
+#respawn-buttons{
+  width: 40%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin: 40px auto auto;
+}
+#gameOver-title{
+  margin-top: 350px;
+}
+#gameOver-subTitle{
+  margin-top: 250px;
+}
+#playAgain-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100%;
+  background-color: slategray;
+  padding: 0 6px 0 6px;
+  font-size: medium;
+  border-radius: 10px;
+}
+#menu-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100%;
+  background-color: slategray;
+  font-size: medium;
+  border-radius: 10px;
+}
+#playAgain-button:hover{
+  background-color: dimgray;
+  cursor: pointer;
+}
+#menu-button:hover{
+  background-color: dimgray;
+  cursor: pointer;
+}
+
 
 
 

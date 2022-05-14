@@ -7,24 +7,48 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/gameStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@100&display=swap" rel="stylesheet">
   <script
           src="https://code.jquery.com/jquery-3.6.0.js"
           integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
-          crossorigin="anonymous"></script>
+          crossorigin="anonymous">
+  </script>
 </head>
 
 <body>
   <div id="container">
+    <div id="gameOverlay">
+      <h1 id="gameOver-title">Game over</h1>
+      <p id="gameOver-subTitle">Play again?</p>
+      <div id="respawn-buttons">
+        <div id="menu-button">
+          <p>Menu</p>
+        </div>
+        <div id="playAgain-button">
+          <p>Replay</p>
+        </div>
+      </div>
+    </div>
     <div id="infoWrapper">
       <div id="playerBalance">
         <img src="img/coinsymbol.png" alt="coinsymbol">
-        <p class="balance">x</p>
-        <p class="balance" id="balanceValue">100000</p>
+        <p class="genFont">x</p>
+        <p class="genFont" id="balanceValue">100000</p>
       </div>
       <div id="playerLife">
         <img src="img/heart-full.png" id="life2" alt="1">
         <img src="img/heart-full.png" id="life1" alt="2">
         <img src="img/heart-full.png" id="life0" alt="3">
+      </div>
+    </div>
+    <div id="healthbarWrapper">
+      <p class="genFont" id="healthbarVal">100</p>
+      <div id="healtbarContainer">
+        <div id="healthbar">
+
+        </div>
       </div>
     </div>
     <canvas></canvas>
