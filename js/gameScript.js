@@ -52,12 +52,12 @@ const upgradeLevels = {
 const bgPositions = [-1800, 600, 900, 900, 900];
 
 const cloudAssets = [
-    convertImageSrc("img/clouds/cloud1.png"),
-    convertImageSrc("img/clouds/cloud2.png"),
-    convertImageSrc("img/clouds/cloud3.png"),
-    convertImageSrc("img/clouds/cloud4.png"),
-    convertImageSrc("img/clouds/cloud5.png"),
-    convertImageSrc("img/clouds/cloud6.png")
+    convertImageSrc("img/clouds/cloud1.PNG"),
+    convertImageSrc("img/clouds/cloud2.PNG"),
+    convertImageSrc("img/clouds/cloud3.PNG"),
+    convertImageSrc("img/clouds/cloud4.PNG"),
+    convertImageSrc("img/clouds/cloud5.PNG"),
+    convertImageSrc("img/clouds/cloud6.PNG")
 ]
 
 window.onload = ()=>{
@@ -96,7 +96,7 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
                 {
                     x: platform.position.x + (platform.width / 2) - 15,
                     y: platform.position.y
-                }, convertImageSrc("../img/coin/coin-easy.png"), 3, 5,
+                }, convertImageSrc("img/coin/coin-easy.PNG"), 3, 5,
                 {
                     x: 1,
                     y: 0
@@ -104,13 +104,13 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
             );
             switch (currentGM) {
                 case 0:
-                    platform.entity.image.src="../img/coin/coin-easy.png"
+                    platform.entity.image.src="img/coin/coin-easy.PNG"
                     break;
                 case 1:
-                    platform.entity.image.src="../img/coin/coin-normal.png"
+                    platform.entity.image.src="img/coin/coin-normal.PNG"
                     break;
                 case 2:
-                    platform.entity.image.src="../img/coin/coin-hard.png"
+                    platform.entity.image.src="img/coin/coin-hard.PNG"
                     break;
             }
             }else if(spawnRate===4 || spawnRate===5){
