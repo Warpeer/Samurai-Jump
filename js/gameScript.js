@@ -52,12 +52,12 @@ const upgradeLevels = {
 const bgPositions = [-1800, 600, 900, 900, 900];
 
 const cloudAssets = [
-    convertImageSrc("../img/clouds/cloud1.png"),
-    convertImageSrc("../img/clouds/cloud2.png"),
-    convertImageSrc("../img/clouds/cloud3.png"),
-    convertImageSrc("../img/clouds/cloud4.png"),
-    convertImageSrc("../img/clouds/cloud5.png"),
-    convertImageSrc("../img/clouds/cloud6.png")
+    convertImageSrc("img/clouds/cloud1.png"),
+    convertImageSrc("img/clouds/cloud2.png"),
+    convertImageSrc("img/clouds/cloud3.png"),
+    convertImageSrc("img/clouds/cloud4.png"),
+    convertImageSrc("img/clouds/cloud5.png"),
+    convertImageSrc("img/clouds/cloud6.png")
 ]
 
 window.onload = ()=>{
@@ -85,7 +85,7 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
                 x: 0,
                 y: 0
             },
-            convertImageSrc("../img/platform.png"),
+            convertImageSrc("img/platform.png"),
             width,
             null,  1, 1, {x:0, y:0}
         );
@@ -96,7 +96,7 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
                 {
                     x: platform.position.x + (platform.width / 2) - 15,
                     y: platform.position.y
-                }, convertImageSrc("../img/coin/coin-easy.png"), 3, 5,
+                }, convertImageSrc("img/coin/coin-easy.png"), 3, 5,
                 {
                     x: 1,
                     y: 0
@@ -104,13 +104,13 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
             );
             switch (currentGM) {
                 case 0:
-                    platform.entity.image.src="../img/coin/coin-easy.png"
+                    platform.entity.image.src="img/coin/coin-easy.png"
                     break;
                 case 1:
-                    platform.entity.image.src="../img/coin/coin-normal.png"
+                    platform.entity.image.src="img/coin/coin-normal.png"
                     break;
                 case 2:
-                    platform.entity.image.src="../img/coin/coin-hard.png"
+                    platform.entity.image.src="img/coin/coin-hard.png"
                     break;
             }
             }else if(spawnRate===4 || spawnRate===5){
@@ -299,7 +299,7 @@ let startPlatform = new MegaPlatform(
     50,
     240,
     440,
-    convertImageSrc("../img/startplatform.png"),
+    convertImageSrc("/img/startplatform.png"),
     1, 1, {x: 30, y: 10}
 );
 
@@ -318,7 +318,7 @@ let player1 = new Player(
     },
     "right",
     90,
-    convertImageSrc("../img/samurai/Idle.png"),
+    convertImageSrc("/img/samurai/Idle.png"),
     2,
     4,
     {
@@ -327,19 +327,19 @@ let player1 = new Player(
     },
     {
         idle: {
-            image: convertImageSrc("../img/samurai/Idle.png"),
+            image: convertImageSrc("/img/samurai/Idle.png"),
             frames: 4
         },
         run: {
-            image: convertImageSrc("../img/samurai/Run.png"),
+            image: convertImageSrc("/img/samurai/Run.png"),
             frames: 8
         },
         jump: {
-            image: convertImageSrc("../img/samurai/Jump.png"),
+            image: convertImageSrc("/img/samurai/Jump.png"),
             frames: 2
         },
         fall: {
-            image: convertImageSrc("../img/samurai/Fall.png"),
+            image: convertImageSrc("/img/samurai/Fall.png"),
             frames: 2
         }
     }
@@ -380,23 +380,23 @@ let upgradeSpeedTower = new upgradeTower({
 const background = new genericEntitys({
     x: 0,
     y: -1800
-}, convertImageSrc("../img/background/mountain-sky.png"));
+}, convertImageSrc("/img/background/mountain-sky.png"));
 const bgMountainFar = new genericEntitys({
     x: 0,
     y: 600
-}, convertImageSrc("../img/background/mountain-mountain-far.png"));
+}, convertImageSrc("/img/background/mountain-mountain-far.png"));
 const bgMountains = new genericEntitys({
     x: 0,
     y: 900
-}, convertImageSrc("../img/background/mountain-mountains.png"));
+}, convertImageSrc("/img/background/mountain-mountains.png"));
 const bgMountainTrees = new genericEntitys({
     x: 0,
     y: 900
-}, convertImageSrc("../img/background/mountain-trees.png"));
+}, convertImageSrc("/img/background/mountain-trees.png"));
 const bgFgTrees = new genericEntitys({
     x: 0,
     y: 900
-}, convertImageSrc("../img/background/mountain-foreground-trees.png"));
+}, convertImageSrc("/img/background/mountain-foreground-trees.png"));
 
 backgroundList.push(background);
 backgroundList.push(bgMountainFar);
@@ -473,7 +473,7 @@ function resetLobbyGame() {
         50,
         240,
         440,
-        convertImageSrc("../img/startplatform.png"),
+        convertImageSrc("/img/startplatform.png"),
         1, 1, {x: 30, y: 10}
     );
     platFormList.push(startPlatform);
@@ -872,7 +872,7 @@ function loadGameOverMenu(){
     miscButton.html("Menu");
     title.html("Game over..");
     subTitle.html("Want to play again?");
-    bgImg.css("background-image", "url(../img/background/menus/deathmenu.jpg)");
+    bgImg.css("background-image", "url(/img/background/menus/deathmenu.jpg)");
     menuImg.attr("src", "img/menulogos/samuraideathlogo.gif");
 
     bgImg.show();
@@ -892,7 +892,7 @@ function loadStartMenu(){
     playButton.html("Play");
     title.html("SAMURAI JUMP");
     subTitle.html("Click \"PLAY\" to play");
-    bgImg.css("background-image", "url(../img/background/menus/startmenu.jpg)");
+    bgImg.css("background-image", "url(/img/background/menus/startmenu.jpg)");
     menuImg.attr("src", "img/menulogos/samuraistartlogo.gif");
 
     bgImg.show();
