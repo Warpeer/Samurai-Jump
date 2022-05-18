@@ -19,14 +19,18 @@
 
 <body>
   <div id="container">
+    <div id="menu-background">
+
+    </div>
     <div id="gameOverlay">
-      <h1 id="gameOver-title">Game over</h1>
-      <p id="gameOver-subTitle">Play again?</p>
-      <div id="respawn-buttons">
+      <h1 id="menu-title">Game over</h1>
+      <img id="menu-logo" alt="menulogo" src="img/menulogos/samuraideathlogo.gif" style="width: 400px; height:400px">
+      <p id="menu-subTitle">Play again?</p>
+      <div id="buttons">
         <div id="menu-button">
           <p>Menu</p>
         </div>
-        <div id="playAgain-button">
+        <div id="play-button">
           <p>Replay</p>
         </div>
       </div>
@@ -44,17 +48,21 @@
       </div>
     </div>
     <div id="healthbarWrapper">
-      <p class="genFont" id="healthbarVal">100</p>
-      <div id="healtbarContainer">
-        <div id="healthbar">
-
+      <div id="healthBorder">
+        <p class="genFont" id="healthbarVal">100</p>
+        <div id="healtbarContainer">
+          <div id="healthbar">
+          </div>
         </div>
+      </div>
+      <div>
+        <p class="genFont" id="score">Score : 0</p>
       </div>
     </div>
     <canvas></canvas>
   </div>
   <script src="js/classes.js" async></script>
-  <script src="js/gameScript.js" async></script>
+  <script type="text/javascript" src="js/gameScript.js" async></script>
 </body>
 
 </html>
