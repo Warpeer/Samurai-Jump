@@ -85,7 +85,7 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
                 x: 0,
                 y: 0
             },
-            convertImageSrc("../img/platform.png"),
+            convertImageSrc("img/platform.png"),
             width,
             null,  1, 1, {x:0, y:0}
         );
