@@ -3,6 +3,8 @@ const c = canvas.getContext("2d");
 canvas.width = 1024;
 canvas.height = 1200;
 let currentScenery = "lobby";
+let currentMenu = "menu";
+let playStatus = false;
 
 c.fillStyle = "black";
 c.fillRect(0, 0, canvas.width, canvas.height);
@@ -14,11 +16,13 @@ let platFormList = [];
 let upgradeTowers = [];
 let doorList = [];
 let projectileList = [];
+let backgroundList=[];
+let cloudList=[];
+let cloudBlockers=[];
 
 const gameModes = ["Easy", "Normal", "Hard"];
 //0=easy, 1=normal, 2=hard
 let currentGM = 0;
-let randomFireDelay;
 
 const keys = {
     a: {
@@ -45,6 +49,21 @@ const upgradeLevels = {
     }
 }
 
+const bgPositions = [-1800, 600, 900, 900, 900];
+
+const cloudAssets = [
+    convertImageSrc("../img/clouds/cloud1.png"),
+    convertImageSrc("../img/clouds/cloud2.png"),
+    convertImageSrc("../img/clouds/cloud3.png"),
+    convertImageSrc("../img/clouds/cloud4.png"),
+    convertImageSrc("../img/clouds/cloud5.png"),
+    convertImageSrc("../img/clouds/cloud6.png")
+]
+
+window.onload = ()=>{
+    loadStartMenu();
+}
+
 //--------------------------------------------GAME FUNCTIONS-----------------------------------------------//
 function randomIntGen(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -52,9 +71,8 @@ function randomIntGen(min, max) {
 
 function calcRandomPlatform(start, limit, offsetY, interval) {
 
-
     for (let i = start; i >= limit; i -= interval) {
-        const width = randomIntGen(80, 150);
+        const width = randomIntGen(150, 250);
         const r = randomIntGen(-1 * offsetY, offsetY);
         const posY = i + r;
         const posX = randomIntGen(0, canvas.width - width - 1);
@@ -67,18 +85,35 @@ function calcRandomPlatform(start, limit, offsetY, interval) {
                 x: 0,
                 y: 0
             },
+            convertImageSrc("../img/platform.png"),
             width,
-            10,
+            null,  1, 1, {x:0, y:0}
         );
+        platform.image.width=platform.width;
         if (spawnRate === 1  || spawnRate===2 || spawnRate===3) {
             platform.hasEntity = true;
             platform.entity = new Coin(
                 {
                     x: platform.position.x + (platform.width / 2) - 15,
                     y: platform.position.y
-                }, 30, 30
+                }, convertImageSrc("../img/coin/coin-easy.png"), 3, 5,
+                {
+                    x: 1,
+                    y: 0
+                }
             );
-        }else if(spawnRate===4){
+            switch (currentGM) {
+                case 0:
+                    platform.entity.image.src="../img/coin/coin-easy.png"
+                    break;
+                case 1:
+                    platform.entity.image.src="../img/coin/coin-normal.png"
+                    break;
+                case 2:
+                    platform.entity.image.src="../img/coin/coin-hard.png"
+                    break;
+            }
+            }else if(spawnRate===4 || spawnRate===5){
             platform.hasEntity = true;
             platform.entity = new Cannon(
                 {
@@ -122,6 +157,52 @@ function generatePlatforms(gamemode) {
 
 generatePlatforms(gameModes[currentGM]);
 
+//generate position and creating instances for each cloud
+
+function calcRandomClouds(start, limit, offSetY, interval, list, scaleMax=1, scaleMin=1){
+    for (let i = start; i >= limit; i -= interval) {
+        const r = randomIntGen(-1 * offSetY, offSetY);
+        const posY = i + r;
+        const posX = randomIntGen(0, canvas.width);
+        const cloudIndex = randomIntGen(0, 5);
+        const cloudScale = (Math.random()*scaleMax)+scaleMin;
+
+        const cloud = new cloudBlocker({
+            x: posX,
+            y: posY
+        },{
+            x: 0,
+            y: 0
+        }, cloudAssets[cloudIndex], cloudScale, 1, {x:0, y:0});
+        list.push(cloud);
+    }
+}
+
+//generates the clouds
+
+function generateClouds(){
+    calcRandomClouds(0, -10_000, 10, 200, cloudList, 2, 1);
+}
+
+generateClouds();
+
+//generates the cloud blockers
+
+function generateCloudBlockers(){
+    calcRandomClouds(-1000, -10_000, 100, 1000, cloudBlockers, 6, 3);
+}
+generateCloudBlockers();
+
+//reset background element positions
+
+function resetBackground(){
+    for(let i = 0; i<backgroundList.length; i++){
+        backgroundList[i].position.y=bgPositions[i];
+    }
+}
+
+resetBackground();
+
 //update life img's
 
 function removeLifeIMG(lifes) {
@@ -130,7 +211,7 @@ function removeLifeIMG(lifes) {
 }
 
 function playerDeath(object) {
-    object.lifes--;
+    object.lifes-=3;
     removeLifeIMG(object.lifes);
     resetLobbyGame();
 }
@@ -148,6 +229,21 @@ function updateHealth(object) {
         object.lifes--;
         removeLifeIMG(object.lifes);
     }
+}
+
+//update score
+
+function updateScore(object){
+    object.score=0;
+    $('#score').html("Score : " + object.score);
+}
+
+//object from image source to save dup code
+
+function convertImageSrc(imgsrc) {
+    const img = new Image();
+    img.src=imgsrc;
+    return img;
 }
 //--------------------------------------------OBJECT INITS-----------------------------------------------//
 
@@ -196,14 +292,15 @@ let startPlatform = new MegaPlatform(
     }, {
         x: 0,
         y: 0
-    }, 600,
-    30,
+    }, 550,
     blackSmithDoor,
     armoryDoor,
     miscDoor,
     50,
-    275,
-    500,
+    240,
+    440,
+    convertImageSrc("../img/startplatform.png"),
+    1, 1, {x: 30, y: 10}
 );
 
 platFormList.push(startPlatform);
@@ -220,9 +317,32 @@ let player1 = new Player(
         y: 0
     },
     "right",
-    20,
-    75,
-    90
+    90,
+    convertImageSrc("../img/samurai/Idle.png"),
+    2,
+    4,
+    {
+        x: 175,
+        y: 235,
+    },
+    {
+        idle: {
+            image: convertImageSrc("../img/samurai/Idle.png"),
+            frames: 4
+        },
+        run: {
+            image: convertImageSrc("../img/samurai/Run.png"),
+            frames: 8
+        },
+        jump: {
+            image: convertImageSrc("../img/samurai/Jump.png"),
+            frames: 2
+        },
+        fall: {
+            image: convertImageSrc("../img/samurai/Fall.png"),
+            frames: 2
+        }
+    }
 );
 
 
@@ -255,13 +375,41 @@ let upgradeSpeedTower = new upgradeTower({
     y: canvas.height - 475
 }, 100, 475, speedBar, "speed");
 
-//cannon instance
+//backgrounds
 
+const background = new genericEntitys({
+    x: 0,
+    y: -1800
+}, convertImageSrc("../img/background/mountain-sky.png"));
+const bgMountainFar = new genericEntitys({
+    x: 0,
+    y: 600
+}, convertImageSrc("../img/background/mountain-mountain-far.png"));
+const bgMountains = new genericEntitys({
+    x: 0,
+    y: 900
+}, convertImageSrc("../img/background/mountain-mountains.png"));
+const bgMountainTrees = new genericEntitys({
+    x: 0,
+    y: 900
+}, convertImageSrc("../img/background/mountain-trees.png"));
+const bgFgTrees = new genericEntitys({
+    x: 0,
+    y: 900
+}, convertImageSrc("../img/background/mountain-foreground-trees.png"));
+
+backgroundList.push(background);
+backgroundList.push(bgMountainFar);
+backgroundList.push(bgMountains);
+backgroundList.push(bgMountainTrees);
+backgroundList.push(bgFgTrees);
 
 doorList.push(exitArmory);
 
 upgradeTowers.push(upgradeJumpTower);
 upgradeTowers.push(upgradeSpeedTower);
+
+
 
 
 //--------------------------------------------RESET FUNCTIONS-----------------------------------------------//
@@ -272,8 +420,11 @@ function resetLobbyGame() {
     currentScenery = "lobby";
     platFormList = [];
     projectileList=[];
+    cloudList=[];
+    cloudBlockers=[];
 
     player1.hp=100;
+    updateScore(player1);
     removeLifeIMG(player1.lifes);
     updateHealth(player1);
 
@@ -315,18 +466,33 @@ function resetLobbyGame() {
         }, {
             x: 0,
             y: 0
-        }, 600,
-        30,
-        armoryDoor,
+        }, 550,
         blackSmithDoor,
+        armoryDoor,
         miscDoor,
         50,
-        275,
-        500,
+        240,
+        440,
+        convertImageSrc("../img/startplatform.png"),
+        1, 1, {x: 30, y: 10}
     );
     platFormList.push(startPlatform);
 
+    //regen the platforms
+
     generatePlatforms(gameModes[currentGM]);
+
+    //regen the clouds
+
+    generateClouds();
+
+    //regen the cloudBlockers
+
+    generateCloudBlockers();
+
+    //resets the background
+
+    resetBackground();
 
     //player position reset (dont wanna create new instance as it'll remove other stats)
 
@@ -355,11 +521,35 @@ function resetArmory() {
 function animate() {
 
     window.requestAnimationFrame(animate);
+
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
     //elements to update if player in lobby
 
     if (currentScenery === "lobby") {
+
+        //parallax scroll effect
+
+        if(player1.velocity.y<0){
+            backgroundList[0].position.y+=0.3;
+            backgroundList[1].position.y+=0.25;
+            backgroundList[2].position.y+=0.15;
+            backgroundList[3].position.y+=0.10;
+            backgroundList[4].position.y+=0.05;
+            cloudList.forEach((cloud) => {
+                cloud.position.y+=0.4;
+            });
+        }
+
+        //background
+        backgroundList.forEach((img) =>{
+            img.draw();
+        });
+
+        //clouds
+        cloudList.forEach((cloud) => {
+            cloud.draw();
+        });
 
         //platforms//
         platFormList.forEach((platform) => {
@@ -404,7 +594,12 @@ function animate() {
     }
 
     if(player1.lifes===0){
-        $('#gameOverlay').show();
+        loadGameOverMenu();
+    }
+    if(player1.velocity.y<0){
+        player1.changeAnimation("jump");
+    }else if(player1.velocity.y>0){
+        player1.changeAnimation("fall");
     }
 
     //elements to update if player is in armory
@@ -464,6 +659,11 @@ function animate() {
 
     player1.update();
 
+    if(currentScenery==="lobby"){
+        cloudBlockers.forEach((cloud) => {
+            cloud.update();
+        });
+    }
 
     //check for platform detection
 
@@ -479,10 +679,10 @@ function animate() {
         //check for coin collision
 
         if (platform.hasEntity && platform.entity?.toString() === "coin") {
-            if (player1.position.y <= platform.entity.position.y + platform.entity.height &&
-                player1.position.y + player1.height + player1.velocity.y >= platform.entity.position.y &&
-                player1.position.x + player1.width + player1.velocity.x >= platform.entity.position.x &&
-                player1.position.x + player1.velocity.x <= platform.entity.position.x + platform.entity.width) {
+            if (player1.position.y <= platform.entity.position.y+30 + platform.entity.height &&
+                player1.position.y + player1.height >= platform.entity.position.y &&
+                player1.position.x <= platform.entity.position.x+platform.entity.width &&
+                player1.position.x + player1.width >= platform.entity.position.x) {
                 platform.entity = null;
                 platform.hasEntity = false;
                 platform.update();
@@ -493,7 +693,7 @@ function animate() {
                     case 1:
                         player1.coins += 2;
                         break;
-                    case 3:
+                    case 2:
                         player1.coins += 3;
                         break;
                 }
@@ -503,12 +703,20 @@ function animate() {
     });
 
     //enhanced movement
+
     if (keys.a.pressed && player1.lastKeyPressed === "a") {
         player1.velocity.x = -upgradeLevels.speed.value[player1.currentSpeedLevel - 1];
+
+        //updates animation
+        player1.changeAnimation("run");
     } else if (keys.d.pressed && player1.lastKeyPressed === "d") {
         player1.velocity.x = upgradeLevels.speed.value[player1.currentSpeedLevel - 1];
+        //updates animation
+        player1.changeAnimation("run");
     } else if (keys.w.pressed && player1.lastKeyPressed === "w" && player1.velocity.y === 0 && player1.midBorderMovement === true) {
         player1.velocity.y = -upgradeLevels.jump.value[player1.currentJumpLevel - 1]
+    }else{
+        player1.changeAnimation("idle");
     }
 
     //collision detection for interactions (e)
@@ -629,19 +837,64 @@ setInterval(() => {
 
 //--------------------------------------------menu controls-----------------------------------------------//
 
-const respawnButton = $('#playAgain-button');
+const playButton = $('#play-button');
+const miscButton = $('#menu-button');
+const menuImg = $('#menu-logo');
 
-respawnButton.click(()=>{
+playButton.click(()=>{
     player1.lifes=3;
     $('#gameOverlay').hide();
+    $('#menu-background').hide();
     resetLobbyGame();
     for(let i=0;i<=2;i++){
         let outPut = "life" + i;
         $('#' + outPut).attr("src", "img/heart-full.png");
     }
 });
-// respawnButton.hover(() => {
-//     $('#playAgain-button').style
-// }, () => {
-//
-// });
+miscButton.click(()=>{
+    if(currentMenu==="menu"){
+        console.log("Leaderboard");
+    }else if(currentMenu==="gameOver"){
+        player1.lifes=3;
+        loadStartMenu();
+    }
+});
+
+function loadGameOverMenu(){
+    currentMenu="gameOver";
+    //playStatus=false;
+
+    const menu = $('#gameOverlay');
+    const title = $('#menu-title');
+    const subTitle = $('#menu-subTitle');
+    const bgImg = $('#menu-background');
+
+    miscButton.html("Menu");
+    title.html("Game over..");
+    subTitle.html("Want to play again?");
+    bgImg.css("background-image", "url(../img/background/menus/deathmenu.jpg)");
+    menuImg.attr("src", "img/menulogos/samuraideathlogo.gif");
+
+    bgImg.show();
+    menu.show();
+}
+
+function loadStartMenu(){
+    currentMenu="menu";
+    playStatus=false;
+
+    const menu = $('#gameOverlay');
+    const title = $('#menu-title');
+    const subTitle = $('#menu-subTitle');
+    const bgImg = $('#menu-background');
+
+    miscButton.html("Leaderboard");
+    playButton.html("Play");
+    title.html("SAMURAI JUMP");
+    subTitle.html("Click \"PLAY\" to play");
+    bgImg.css("background-image", "url(../img/background/menus/startmenu.jpg)");
+    menuImg.attr("src", "img/menulogos/samuraistartlogo.gif");
+
+    bgImg.show();
+    menu.show();
+}

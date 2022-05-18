@@ -1,6 +1,35 @@
+//generic Object class
+
+class genericEntitys{
+  constructor(position, image, scale=1) {
+    this.position=position;
+    this.image=image;
+    this.scale=scale;
+    this.image.width*=this.scale
+    this.image.height*=this.scale;
+  }
+  draw(){
+    c.drawImage(
+        this.image,
+        this.position.x,
+        this.position.y);
+  }
+//   c.drawImage(
+//   this.image,
+//   this.currentFrame*(this.image.width/this.totalFrames),
+//   0,
+//   this.image.width/this.totalFrames,
+//   this.image.height,
+//   this.position.x-this.offSet.x,
+//   this.position.y-this.offSet.y,
+//   (this.image.width/this.totalFrames)*this.scale,
+//   this.image.height*this.scale
+// );
+}
+
+
 //punchingBag class
 class PunchingBag {
-  onGround;
 
   constructor(width, height, velocity) {
     this.width = width;
@@ -60,7 +89,52 @@ class PunchingBag {
 
 //player class
 
-class Player {
+class Sprite {
+
+  constructor(position, image, scale = 1, frames = 1, offSet = {x: 0, y: 0}) {
+    this.position = position;
+    this.image=image;
+    this.width = 20;
+    this.height = 70;
+    this.scale=scale;
+    this.totalFrames=frames;
+    this.currentFrame=0;
+    this.framesAnimated=0;
+    this.framesCooldown=5;
+    this.offSet=offSet;
+  }
+
+  draw() {
+    c.drawImage(
+        this.image,
+        this.currentFrame*(this.image.width/this.totalFrames),
+        0,
+        this.image.width/this.totalFrames,
+        this.image.height*1,
+        this.position.x-this.offSet.x,
+        this.position.y-this.offSet.y,
+        (this.image.width/this.totalFrames)*this.scale,
+        this.image.height*this.scale
+    );
+  }
+
+  startAnimation(){
+    this.framesAnimated++;
+    if(this.framesAnimated % this.framesCooldown === 0){
+      if(this.currentFrame<this.totalFrames-1){
+        this.currentFrame++;
+      }else {
+        this.currentFrame=0;
+      }
+    }
+  }
+
+  update() {
+    this.draw();
+  }
+}
+
+class Player extends Sprite{
 
   lastKeyPressed;
   midBorderMovement;
@@ -69,18 +143,24 @@ class Player {
   isAttacking=false;
   isInteracting=false;
 
+  score = 0;
   lifes = 3;
   hp = 100;
   coins = 100000;
   currentJumpLevel=5;
   currentSpeedLevel=5;
 
-  constructor(position, velocity, direction, width, height, attackRange) {
-    this.position = position;
+  currentFrame=0;
+  framesAnimated=0;
+  framesCooldown=20;
+
+  constructor(position, velocity, direction, attackRange, image, scale = 1, frames = 1, offSet, animations) {
+    super(position, image, scale, frames, offSet);
+
     this.velocity = velocity;
     this.direction = direction;
-    this.height = height;
-    this.width = width;
+    this.height = 20;
+    this.width = 70;
     this.attackRange = attackRange;
     this.attackArea = {
       position: {
@@ -90,29 +170,15 @@ class Player {
       width: this.attackRange,
       height: this.height / 3
     }
-  }
-
-  defineAttackDim() {
-    c.fillStyle = "red";
-    if (this.direction === "left") {
-      c.fillRect(this.position.x + this.width, this.position.y, -1 * this.attackArea.width, this.attackArea.height);
-    } else if (this.direction === "right") {
-      c.fillRect(this.position.x, this.position.y, this.attackArea.width, this.attackArea.height);
-    }
-  }
-
-  draw() {
-    c.fillStyle = "green";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
-    if(this.isAttacking){
-      this.defineAttackDim();
-    }
+    this.animations=animations;
   }
 
   update() {
-    this.draw();
+    super.update();
+    super.startAnimation();
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
+
 
     //life value check
 
@@ -139,6 +205,11 @@ class Player {
         platFormList.forEach((platform) => {
           platform.velocity.y=-force*1.25;
         });
+        cloudBlockers.forEach((cloud) => {
+          cloud.velocity.y=-force*1.4;
+        });
+        player1.score+=Math.floor(-force)*5;
+        $('#score').html("Score: " + player1.score);
       }
       player1.velocity.y=0;
     }else{
@@ -170,56 +241,66 @@ class Player {
       this.isInteracting=false
     }, 1000);
   }
-}
-
-
-//platform entity class
-
-class platformEntity{
-  constructor(position, width, height) {
-    this.position=position;
-    this.width=width;
-    this.height=height;
-  }
-  draw(fillstyle){
-    c.fillStyle = fillstyle;
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
-  }
-  update(posY){
-    this.draw();
-    this.position.y=posY-this.height;
+  changeAnimation(action){
+    switch (action) {
+      case "idle":
+        if(this.image!==this.animations.idle.image){
+          this.image=this.animations.idle.image;
+          this.totalFrames=this.animations.idle.frames;
+          this.currentFrame=0;
+        }
+        break;
+      case "run":
+        if(this.image!==this.animations.run.image){
+          this.image=this.animations.run.image;
+          this.totalFrames=this.animations.run.frames;
+          this.currentFrame=0;
+        }
+        break;
+      case "jump":
+        if(this.image!==this.animations.jump.image){
+          this.image=this.animations.jump.image;
+          this.totalFrames=this.animations.jump.frames;
+          this.currentFrame=0;
+        }
+        break;
+      case "fall":
+        if(this.image!==this.animations.fall.image){
+          this.image=this.animations.fall.image;
+          this.totalFrames=this.animations.fall.frames;
+          this.currentFrame=0;
+        }
+        break;
+    }
   }
 }
 
 //platform class
 
-class Platform{
+class Platform extends Sprite{
 
   hasEntity;
 
-  constructor(position, velocity, width, height, entity) {
-    this.position = position;
+  currentFrame=0;
+  framesAnimated=0;
+  framesCooldown=20;
+
+  constructor(position, velocity, image, width, entity,  scale, frames, offSet) {
+    super(position, image, scale, frames, offSet);
     this.velocity = velocity;
     this.width = width;
-    this.height = height;
+    this.height = 20;
     if(entity){
       this.hasEntity=true;
       this.entity = entity;
     }else this.hasEntity=false;
   }
 
-  draw(fillstyle){
-    c.fillStyle= fillstyle;
-    c.fillRect(this.position.x, this.position.y, this.width, this.height)
-  }
-
   update(){
-    this.draw("gray");
+    super.update();
     this.position.y += this.velocity.y;
     if(this.velocity.y>0){
       this.velocity.y -= gravity;
-      if(this.hasEntity){
-      }
     }else{
       this.velocity.y=0;
     }
@@ -234,18 +315,21 @@ class Platform{
 
 //coin class
 
-class Coin extends platformEntity{
+class Coin extends Sprite{
 
-  constructor(position, width, height) {
-    super(position, width, height);
-    this.fillstyle="yellow";
-  }
-  draw() {
-    super.draw(this.fillstyle);
+  currentFrame=0;
+  framesAnimated=0;
+  framesCooldown=20;
+
+  constructor(position, image, scale = 1, frames = 1, offSet) {
+    super(position, image, scale, frames, offSet);
+    this.width=30;
+    this.height=30;
   }
   update(posY) {
     this.position.y=posY-this.height-30
-    this.draw();
+    super.update();
+    super.startAnimation();
   }
   toString(){
     return "coin";
@@ -254,13 +338,16 @@ class Coin extends platformEntity{
 
 //MegaPlatform class
 
-class MegaPlatform extends Platform{
+class MegaPlatform extends Sprite{
 
-  constructor(position, velocity, width, height, entity, entity2, entity3, offset, offset2, offset3) {
-    super(position, velocity, width, height);
+  constructor(position, velocity, width, entity, entity2, entity3, offset1, offset2, offset3, image, scale, frames, offSet) {
+    super(position, image, scale, frames, offSet);
+
+    this.velocity=velocity
+    this.width=width;
 
     this.entity1=entity;
-    this.entity1.position.x+=offset;
+    this.entity1.position.x+=offset1;
 
     this.entity2=entity2;
     this.entity2.position.x+=offset2;
@@ -269,12 +356,8 @@ class MegaPlatform extends Platform{
     this.entity3.position.x+=offset3;
   }
 
-  draw() {
-    c.fillStyle="orange";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
-  }
   update() {
-    this.draw()
+    super.update();
     this.position.y += this.velocity.y;
     if(this.velocity.y>0){
       this.velocity.y -= gravity;
@@ -314,14 +397,17 @@ class Projectile{
 
 //cannon class
 
-class Cannon extends platformEntity{
+class Cannon{
 
   constructor(position, width, height) {
-    super(position, width, height);
+    this.position=position;
+    this.width=width;
+    this.height=height;
     this.fillstyle="gray";
   }
   draw() {
-    super.draw(this.fillstyle);
+    c.fillStyle=this.fillstyle;
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
   update(posY) {
     this.position.y=posY-this.height;
@@ -343,39 +429,24 @@ class Cannon extends platformEntity{
   }
 }
 
-//shaft class (for cannon class)
+//door class
 
-class Shaft {
-  constructor(position, width, height) {
+class Door{
+
+  constructor(position, width, height, fillstyle, destination) {
     this.position=position;
     this.width=width;
     this.height=height;
-  }
-  draw(){
-    c.rotate(45);
-    c.fillRect(this.position.x, this.position.y-this.height, this.width, this.height);
-    c.rotate(-45);
-  }
-  update(){
-    this.draw();
-  }
-}
-
-//door class
-
-class Door extends platformEntity{
-
-  constructor(position, width, height, fillstyle, destination) {
-    super(position, width, height);
     this.fillstyle=fillstyle;
     this.destination=destination;
   }
-  draw(fillstyle) {
-    super.draw(fillstyle);
+  draw() {
+    c.fillStyle=this.fillstyle;
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
   update(posY) {
-    super.update(posY);
-    this.draw(this.fillstyle);
+    this.position.y=posY-this.height;
+    this.draw();
   }
   toString(){
     return "door";
@@ -418,6 +489,23 @@ class upgradeTower{
   }
   toString(){
     return this.type;
+  }
+}
+
+class cloudBlocker extends Sprite{
+  constructor(position, velocity, image, scale, frames, offSet) {
+    super(position, image, scale, frames, offSet);
+    this.velocity=velocity;
+  }
+  update() {
+    super.update();
+    this.position.y+=this.velocity.y;
+
+    if(this.velocity.y>0){
+      this.velocity.y -= gravity;
+    }else{
+      this.velocity.y=0;
+    }
   }
 }
 
